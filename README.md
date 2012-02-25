@@ -50,7 +50,7 @@ This tool is still experimental.
     <service_bundle type="manifest" name="application-bapi" >
         <service name="application/bapi" type="service" version="1" >
             <create_default_instance enabled="true" />
-            <dependency name="svc:/milestone/multi-user:default" grouping="require_all" restart_on="error" type="service" >
+            <dependency name="dep1" grouping="require_all" restart_on="error" type="service" >
                 <service_fmri value="svc:/milestone/multi-user:default" />
             </dependency>
             <exec_method type="method" name="start" exec="node bapi.js &amp;" timeout_seconds="10" />
@@ -62,3 +62,20 @@ This tool is still experimental.
             </template>
         </service>
     </service_bundle>
+
+# Assumptions
+
+This tool makes a ton of assumptions about your service:
+
+* Your service is a contract-model service in SMF. That means SMF should consider the service failed (and potentially restart it) if:
+    * all processes in the service exit, OR
+    * any process in the service produces a core dump, OR
+    * any process outside the service sends any service process a fatal signal
+  See svc.startd(1M) for details.
+* Your service is an application which depends on system services like the filesystem and network. This tool wouldn't work for system services implementing any of that functionality.
+* If you specify any additional dependencies (like other services of yours), that means your service should not be started until those other services are online. However, if those services restart, your service will not be restarted.
+* You only intend to have one instance of your service, and it starts off enabled.
+* SMF provides a mechanism for timing out the "start" operation. But for simplicity, this tool always runs your start script in the background, so as far as SMF sees it starts almost instantly. If you want to detect "start" timeout, you must implement a start method that returns exactly when your program has started providing service (e.g., opened its server socket), and you'll have to write your own manifest rather than use this tool.
+* By default, the "stop" method just kills all processes in this service, which includes all processes forked by the initial "start" script. You can override this with a "stop" script, but you should use the default if that script is only going to kill processes. There's a 30 second timeout on the stop script, so the processes must exit within about 30 seconds of receiving the signal.
+* The service does not use SMF to store configuration properties.
+* The start and stop scripts run as root in a vanilla environment.
