@@ -98,6 +98,7 @@ function emitManifest(stream, conf)
 
 	xml.emitEmpty('create_default_instance', { 'enabled': 'true' });
 
+	i = 0;
 	deps.forEach(function (dep) {
 		xml.emitStart('dependency', {
 			'name': 'dep' + i++,
