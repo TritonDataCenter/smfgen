@@ -80,6 +80,8 @@ function emitManifest(stream, conf)
 		fmri = 'application/' + conf['ident'];
 	}
 
+	if (!conf.timeout) conf.timeout = {};
+
 	xml.emitDoctype('service_bundle', 'SYSTEM',
 	    '/usr/share/lib/xml/dtd/service_bundle.dtd.1');
 	xml.emitComment(header_comment);
@@ -115,14 +117,14 @@ function emitManifest(stream, conf)
 		'type': 'method',
 		'name': 'start',
 		'exec': conf['start'] + ' &',
-		'timeout_seconds': 10
+		'timeout_seconds': conf.timeout.start || 10
 	});
 
 	xml.emitEmpty('exec_method', {
 		'type': 'method',
 		'name': 'stop',
 		'exec': stop,
-		'timeout_seconds': 30
+		'timeout_seconds': conf.timeout.stop || 30
 	});
 
 	xml.emitStart('template');
