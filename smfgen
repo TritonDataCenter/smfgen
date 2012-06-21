@@ -80,7 +80,8 @@ function emitManifest(stream, conf)
 		fmri = 'application/' + conf['ident'];
 	}
 
-	if (!conf.timeout) conf.timeout = {};
+	if (!conf.timeout)
+		conf.timeout = {};
 
 	xml.emitDoctype('service_bundle', 'SYSTEM',
 	    '/usr/share/lib/xml/dtd/service_bundle.dtd.1');
