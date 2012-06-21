@@ -29,6 +29,10 @@ This tool is still experimental.
      *                  doesn't know when the service has actually started.
      *
      * [stop]           Script that stops this service.
+     *
+     * [timeout.start]  Timeout for the start method (default: 10)
+     *
+     * [timeout.stop]   Timeout for the stop method (default: 30)
      */
 
 
@@ -76,6 +80,6 @@ This tool makes a ton of assumptions about your service:
 * If you specify any additional dependencies (like other services of yours), that means your service should not be started until those other services are online. However, if those services restart, your service will not be restarted.
 * You only intend to have one instance of your service, and it starts off enabled.
 * SMF provides a mechanism for timing out the "start" operation. But for simplicity, this tool always runs your start script in the background, so as far as SMF sees it starts almost instantly. If you want to detect "start" timeout, you must implement a start method that returns exactly when your program has started providing service (e.g., opened its server socket), and you'll have to write your own manifest rather than use this tool.
-* By default, the "stop" method just kills all processes in this service, which includes all processes forked by the initial "start" script. You can override this with a "stop" script, but you should use the default if that script is only going to kill processes. There's a 30 second timeout on the stop script, so the processes must exit within about 30 seconds of receiving the signal.
+* By default, the "stop" method just kills all processes in this service, which includes all processes forked by the initial "start" script. You can override this with a "stop" script, but you should use the default if that script is only going to kill processes. There's a default 30 second timeout on the stop script, so the processes must exit within about 30 seconds of receiving the signal.
 * The service does not use SMF to store configuration properties.
 * The start and stop scripts run as root in a vanilla environment.
