@@ -37,6 +37,21 @@ var header_comment = [
  *			doesn't know when the service has actually started.
  *
  * [stop]		Script that stops this service.
+ *
+ * [timeout.start]	Timeout for the start method (default: 10)
+ *
+ * [timeout.stop]	Timeout for the stop method (default: 30)
+ *
+ * [user]		Run the start/stop methods as this user.
+ *
+ * [group]		Run the start/stop methods as this group.
+ *
+ * [privileges]		An array of RBAC privilege names.  The start/stop
+ *			methods will be run with this privilege set.
+ *			See also: privileges(5).
+ *
+ * [environment]	A hash of environment variables for the start/stop
+ *			methods.
  */
 function emitManifest(stream, conf)
 {
@@ -113,6 +128,31 @@ function emitManifest(stream, conf)
 		xml.emitEmpty('service_fmri', { 'value': dep });
 		xml.emitEnd('dependency');
 	});
+
+	if (conf.user || conf.group || conf.privileges || conf.environment) {
+		xml.emitStart('method_context');
+
+		var attrs = {};
+		if (conf.user)
+			attrs.user = conf.user;
+		if (conf.group)
+			attrs.group = conf.group;
+		if (conf.privileges)
+			attrs.privileges = conf.privileges.join(",");
+		if (Object.keys(attrs).length > 0)
+			xml.emitEmpty('method_credential', attrs);
+
+		if (conf.environment) {
+			xml.emitStart('method_environment');
+			Object.keys(conf.environment).forEach(function (k) {
+				var v = conf.environment[k];
+				xml.emitEmpty('envvar', { name: k, value: v });
+			});
+			xml.emitEnd('method_environment');
+		}
+
+		xml.emitEnd('method_context');
+	}
 
 	xml.emitEmpty('exec_method', {
 		'type': 'method',
