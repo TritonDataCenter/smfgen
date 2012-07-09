@@ -33,6 +33,17 @@ This tool is still experimental.
      * [timeout.start]  Timeout for the start method (default: 10)
      *
      * [timeout.stop]   Timeout for the stop method (default: 30)
+     *
+     * [user]           Run the start/stop methods as this user.
+     *
+     * [group]          Run the start/stop methods as this group.
+     *
+     * [privileges]     An array of RBAC privilege names.  The start/stop
+     *                  methods will be run with this privilege set.
+     *                  See also: privileges(5).
+     *
+     * [environment]    A hash of environment variables for the start/stop
+     *                  methods.
      */
 
 
@@ -82,4 +93,3 @@ This tool makes a ton of assumptions about your service:
 * SMF provides a mechanism for timing out the "start" operation. But for simplicity, this tool always runs your start script in the background, so as far as SMF sees it starts almost instantly. If you want to detect "start" timeout, you must implement a start method that returns exactly when your program has started providing service (e.g., opened its server socket), and you'll have to write your own manifest rather than use this tool.
 * By default, the "stop" method just kills all processes in this service, which includes all processes forked by the initial "start" script. You can override this with a "stop" script, but you should use the default if that script is only going to kill processes. There's a default 30 second timeout on the stop script, so the processes must exit within about 30 seconds of receiving the signal.
 * The service does not use SMF to store configuration properties.
-* The start and stop scripts run as root in a vanilla environment.
