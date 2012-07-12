@@ -16,6 +16,100 @@ var header_comment = [
     ''
 ].join('\n');
 
+function checkAndApplyContext(prefix, conf, applyto)
+{
+	var s = (prefix ? prefix + '.' : '');
+
+	if (conf.hasOwnProperty('user')) {
+		mod_assert.equal(typeof (conf.user), 'string',
+		    '"' + s + 'user" property must be a string');
+		applyto.user = conf.user;
+	}
+
+	if (conf.hasOwnProperty('group')) {
+		mod_assert.equal(typeof (conf.group), 'string',
+		    '"' + s + 'group" property must be a string');
+		applyto.group = conf.group;
+	}
+
+	if (conf.hasOwnProperty('environment')) {
+		mod_assert.equal(typeof (conf.environment), 'object',
+		    '"' + s + 'environment" property must be an object');
+		applyto.environment = conf.environment;
+	}
+
+	if (conf.hasOwnProperty('privileges')) {
+		mod_assert.ok(Array.isArray(conf.privileges),
+		    '"' + s + 'privileges" property must be an array');
+		applyto.privileges = conf.privileges;
+	}
+
+	if (conf.hasOwnProperty('exec')) {
+		mod_assert.equal(typeof (conf.exec), 'string',
+		    '"' + s + 'exec" property must be a string');
+		applyto.exec = conf.exec;
+	}
+
+	if (conf.hasOwnProperty('timeout')) {
+		mod_assert.equal(typeof (conf.timeout), 'number',
+		    '"' + s + 'timeout" property must be a number');
+		applyto.timeout = conf.timeout;
+	}
+}
+
+function shouldEmitMethodContext(conf)
+{
+	var lookfor = ['user', 'group', 'privileges', 'environment'];
+	for (var i = 0; i < lookfor.length; i++) {
+		if (conf.hasOwnProperty(lookfor[i]))
+			return (true);
+	}
+	return (false);
+}
+
+function emitMethodContext(xml, conf)
+{
+	xml.emitStart('method_context');
+
+	var attrs = {};
+	if (conf.user)
+		attrs.user = conf.user;
+	if (conf.group)
+		attrs.group = conf.group;
+	if (conf.privileges)
+		attrs.privileges = conf.privileges.join(",");
+	if (Object.keys(attrs).length > 0)
+		xml.emitEmpty('method_credential', attrs);
+
+	if (conf.environment) {
+		xml.emitStart('method_environment');
+		Object.keys(conf.environment).forEach(function (k) {
+			var v = conf.environment[k];
+			xml.emitEmpty('envvar', { name: k, value: v });
+		});
+		xml.emitEnd('method_environment');
+	}
+
+	xml.emitEnd('method_context');
+}
+
+function emitMethod(xml, conf)
+{
+	var attrs = {
+		type: 'method',
+		name: conf.name,
+		exec: conf.exec,
+		timeout_seconds: conf.timeout,
+	};
+	if (shouldEmitMethodContext(conf)) {
+		xml.emitStart('exec_method', attrs);
+		emitMethodContext(xml, conf);
+		xml.emitEnd('exec_method');
+	} else {
+		xml.emitEmpty('exec_method', attrs);
+	}
+}
+
 /*
  * Emit an SMF manifest for the service described by the given JSON:
  *
@@ -56,9 +150,12 @@ var header_comment = [
 function emitManifest(stream, conf)
 {
 	var xml = new XmlEmitter(stream);
-	var stop = {};
 	var deps = [ 'svc:/milestone/multi-user:default' ];
 	var fmri, i;
+
+	// default values for start/stop methods:
+	var start = { name: 'start', timeout: 10 };
+	var stop = { name: 'stop', timeout: 30, exec: ':kill' };
 
 	mod_assert.ok(conf.hasOwnProperty('ident') &&
 	    typeof (conf['ident']) == 'string',
@@ -66,9 +163,33 @@ function emitManifest(stream, conf)
 	mod_assert.ok(conf.hasOwnProperty('label') &&
 	    typeof (conf['label']) == 'string',
 	    '"label" property must be a string');
-	mod_assert.ok(conf.hasOwnProperty('start') &&
-	    typeof (conf['start']) == 'string',
-	    '"start" property must be a string');
+
+	/*
+	 * Apply the global versions of method context and exec from the root
+	 * of the config object first, then override them if more specific
+	 * options exist for a particular method.
+	 */
+	checkAndApplyContext(null, conf, start);
+	checkAndApplyContext(null, conf, stop);
+
+	if (conf.hasOwnProperty('start')) {
+		if (typeof (conf.start) === 'string') {
+			start.exec = conf.start;
+		} else {
+			checkAndApplyContext('start', conf.start, start);
+		}
+	}
+	mod_assert.ok(start.hasOwnProperty('exec') &&
+	    typeof (start.exec) === 'string',
+	    'must provide either "exec" or "start.exec" property as a string');
+	start.exec += ' &';
+
+	if (conf.hasOwnProperty('stop')) {
+		if (typeof (conf.stop) === 'string')
+			stop.exec = conf.stop;
+		else
+			checkAndApplyContext('stop', conf.stop, stop);
+	}
 
 	if (conf.hasOwnProperty('dependencies')) {
 		mod_assert.ok(Array.isArray(conf['dependencies']),
@@ -79,14 +200,6 @@ function emitManifest(stream, conf)
 		});
 	}
 
-	if (conf.hasOwnProperty(conf['stop'])) {
-		mod_assert.equal(typeof (conf['stop']), 'string',
-		    '"stop" property must be a string');
-		stop = conf['stop'];
-	} else {
-		stop = ':kill';
-	}
-
 	if (conf.hasOwnProperty('category')) {
 		mod_assert.equal(typeof (conf['category']), 'string',
 		    '"category" must be a string');
@@ -94,9 +207,6 @@ function emitManifest(stream, conf)
 	} else {
 		fmri = 'application/' + conf['ident'];
 	}
-
-	if (!conf.timeout)
-		conf.timeout = {};
 
 	xml.emitDoctype('service_bundle', 'SYSTEM',
 	    '/usr/share/lib/xml/dtd/service_bundle.dtd.1');
@@ -129,44 +239,8 @@ function emitManifest(stream, conf)
 		xml.emitEnd('dependency');
 	});
 
-	if (conf.user || conf.group || conf.privileges || conf.environment) {
-		xml.emitStart('method_context');
-
-		var attrs = {};
-		if (conf.user)
-			attrs.user = conf.user;
-		if (conf.group)
-			attrs.group = conf.group;
-		if (conf.privileges)
-			attrs.privileges = conf.privileges.join(",");
-		if (Object.keys(attrs).length > 0)
-			xml.emitEmpty('method_credential', attrs);
-
-		if (conf.environment) {
-			xml.emitStart('method_environment');
-			Object.keys(conf.environment).forEach(function (k) {
-				var v = conf.environment[k];
-				xml.emitEmpty('envvar', { name: k, value: v });
-			});
-			xml.emitEnd('method_environment');
-		}
-
-		xml.emitEnd('method_context');
-	}
-
-	xml.emitEmpty('exec_method', {
-		'type': 'method',
-		'name': 'start',
-		'exec': conf['start'] + ' &',
-		'timeout_seconds': conf.timeout.start || 10
-	});
-
-	xml.emitEmpty('exec_method', {
-		'type': 'method',
-		'name': 'stop',
-		'exec': stop,
-		'timeout_seconds': conf.timeout.stop || 30
-	});
+	emitMethod(xml, start);
+	emitMethod(xml, stop);
 
 	xml.emitStart('template');
 	xml.emitStart('common_name');
