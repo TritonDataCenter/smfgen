@@ -30,10 +30,6 @@ This tool is still experimental.
      *
      * [stop]           Script that stops this service.
      *
-     * [timeout.start]  Timeout for the start method (default: 10)
-     *
-     * [timeout.stop]   Timeout for the stop method (default: 30)
-     *
      * [user]           Run the start/stop methods as this user.
      *
      * [group]          Run the start/stop methods as this group.

@@ -87,7 +87,7 @@ function emitMethodContext(xml, conf)
 	if (conf.group)
 		attrs.group = conf.group;
 	if (conf.privileges)
-		attrs.privileges = conf.privileges.join(",");
+		attrs.privileges = conf.privileges.join(',');
 	if (Object.keys(attrs).length > 0)
 		xml.emitEmpty('method_credential', attrs);
 
@@ -109,7 +109,7 @@ function emitMethod(xml, conf)
 		type: 'method',
 		name: conf.name,
 		exec: conf.exec,
-		timeout_seconds: conf.timeout,
+		timeout_seconds: conf.timeout
 	};
 	if (shouldEmitMethodContext(conf)) {
 		xml.emitStart('exec_method', attrs);
@@ -142,10 +142,6 @@ function emitMethod(xml, conf)
  *
  * [stop]		Script that stops this service.
  *
- * [timeout.start]	Timeout for the start method (default: 10)
- *
- * [timeout.stop]	Timeout for the stop method (default: 30)
- *
  * [user]		Run the start/stop methods as this user.
  *
  * [group]		Run the start/stop methods as this group.
@@ -163,7 +159,7 @@ function emitManifest(stream, conf)
 	var deps = [ 'svc:/milestone/multi-user:default' ];
 	var fmri, i;
 
-	// default values for start/stop methods:
+	/* default values for start/stop methods */
 	var start = { name: 'start', timeout: 10 };
 	var stop = { name: 'stop', timeout: 30, exec: ':kill' };
 
