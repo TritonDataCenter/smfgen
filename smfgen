@@ -44,6 +44,12 @@ function checkAndApplyContext(prefix, conf, applyto)
 		applyto.privileges = conf.privileges;
 	}
 
+	if (conf.hasOwnProperty('working_directory')) {
+		mod_assert.equal(typeof (conf.working_directory), 'string',
+		    '"' + s + 'working_directory" property must be a string');
+		applyto.working_directory = conf.working_directory;
+	}
+
 	if (conf.hasOwnProperty('exec')) {
 		mod_assert.equal(typeof (conf.exec), 'string',
 		    '"' + s + 'exec" property must be a string');
@@ -59,7 +65,8 @@ function checkAndApplyContext(prefix, conf, applyto)
 
 function shouldEmitMethodContext(conf)
 {
-	var lookfor = ['user', 'group', 'privileges', 'environment'];
+	var lookfor = ['user', 'group', 'privileges', 'environment',
+	    'working_directory'];
 	for (var i = 0; i < lookfor.length; i++) {
 		if (conf.hasOwnProperty(lookfor[i]))
 			return (true);
@@ -69,9 +76,12 @@ function shouldEmitMethodContext(conf)
 
 function emitMethodContext(xml, conf)
 {
-	xml.emitStart('method_context');
-
 	var attrs = {};
+	if (conf.working_directory)
+		attrs.working_directory = conf.working_directory;
+	xml.emitStart('method_context', attrs);
+
+	attrs = {};
 	if (conf.user)
 		attrs.user = conf.user;
 	if (conf.group)
