@@ -1,46 +1,70 @@
 # smfgen
 
 This tool generates an SMF manifest from a JSON description of the service.
-It's only intended to generate simple manifests. For more details, see smf(5).
+It's only intended to generate simple manifests. For more details, see _smf(5)_.
 
 This tool is still experimental. 
 
 
 # JSON Input
 
-    /*
-     * Emits an SMF manifest for the service described by the given JSON:
-     *
-     * ident            The SMF identifier for the service.  The full SMF
-     *                  identifier (FMRI) will be constructed from the category
-     *                  and identifier.
-     *
-     * [category]       Service category (default: "application").
-     *
-     * label            The human-readable name of the service.
-     *
-     * [dependencies]   Array of service FMRIs that must be online before
-     *                  this service is started.
-     *
-     * start            Script that starts the actual service. This invocation
-     *                  may run the service synchronously or in the background.
-     *                  Note that this mechanism does not allow you to use
-     *                  SMF's built in timeout for service startup, since it
-     *                  doesn't know when the service has actually started.
-     *
-     * [stop]           Script that stops this service.
-     *
-     * [user]           Run the start/stop methods as this user.
-     *
-     * [group]          Run the start/stop methods as this group.
-     *
-     * [privileges]     An array of RBAC privilege names.  The start/stop
-     *                  methods will be run with this privilege set.
-     *                  See also: privileges(5).
-     *
-     * [environment]    A hash of environment variables for the start/stop
-     *                  methods.
-     */
+Emits an SMF manifest for the service described by the given JSON:
+
+| Property       | Description
+|----------------|----------------------------------------------------------
+| ident          | The SMF identifier for the service.  The full SMF identifier (FMRI) will be constructed from the category and identifier.
+| [category]     | Service category (default: "application").
+| label          | The human-readable name of the service.
+| [dependencies] | Array of service FMRIs that must be online before this service is started.
+| start          | The method object that describes how to start the service.  (See below.)
+| [stop]         | The method object that describes how to stop the service.  (See below.)
+
+Both the `start` and `stop` properties in the JSON should have object values that
+describe the context of the method.  A method context consists of these
+properties:
+
+| Property             | Description
+|----------------------|----------------------------------------------------
+| exec                 | The script to run for this method.  Defaults to `:kill` for the `stop` method.  This invocation may run the service synchronously or in the background.  Note that this mechanism does not allow you to use SMF's built in timeout for service startup, since it doesn't know when the service has actually started.
+| [user]               | Run the script for this method as this user.
+| [group]              | Run the script for this method as this group.
+| [environment]        | A hash of environment variables for this method script.
+| [privileges]         | An array of RBAC privilege names.  This method will be run with this privilege set.  See also: _privileges(5)_.
+| [working\_directory] | Use this working directory when invoking the method script.
+| [timeout]            | The number of seconds the method may run before it is considered timed out and aborted.  Defaults to 10 for `start` and 30 for `stop`.
+
+A set of example methods might look like this:
+
+```json
+{
+    "start": {
+        "user": "webservd", "group": "webservd",
+        "exec": "/opt/pkg/sbin/apachectl start"
+    },
+    "stop": {
+        "timeout": 120
+    }
+}
+```
+
+Note that you may also specify the properties that describe the context of a
+method at the top level of the JSON.  Top-level properties apply to all
+methods, but may also be overridden in a specific method.  For example:
+
+```json
+{
+    "user": "webservd", "group": "webservd",
+    "exec": "/opt/pkg/sbin/apachectl %m",
+    "timeout": 10,
+    "stop": {
+        "timeout": 120
+    }
+}
+```
+
+For compatibility with earlier versions of smfgen, the program will accept
+a string in place of an object for the `start` and `stop` methods.  This
+string will be assumed to be the `exec` property of that method.
 
 
 # Example
@@ -82,7 +106,7 @@ This tool makes a ton of assumptions about your service:
     * all processes in the service exit, OR
     * any process in the service produces a core dump, OR
     * any process outside the service sends any service process a fatal signal
-  See svc.startd(1M) for details.
+  See _svc.startd(1M)_ for details.
 * Your service is an application which depends on system services like the filesystem and network. This tool wouldn't work for system services implementing any of that functionality.
 * If you specify any additional dependencies (like other services of yours), that means your service should not be started until those other services are online. However, if those services restart, your service will not be restarted.
 * You only intend to have one instance of your service, and it starts off enabled.

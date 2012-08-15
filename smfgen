@@ -121,37 +121,12 @@ function emitMethod(xml, conf)
 }
 
 /*
- * Emit an SMF manifest for the service described by the given JSON:
+ * Emit an SMF manifest for the service described by the given JSON.  The
+ * expected structure of the JSON stream is specified in README.md.
  *
- * ident		The SMF identifier for the service.  The full SMF
- * 			identifier (FMRI) will be constructed from the category
- * 			and identifier.
- *
- * [category]		Service category (default: "application").
- *
- * label		The human-readable name of the service.
- *
- * [dependencies]	Array of service FMRIs that must be online before
- * 			this service is started.
- *
- * start		Script that starts the actual service. This invocation
- * 			may run the service synchronously or in the background.
- *			Note that this mechanism does not allow you to use
- *			SMF's built in timeout for service startup, since it
- *			doesn't know when the service has actually started.
- *
- * [stop]		Script that stops this service.
- *
- * [user]		Run the start/stop methods as this user.
- *
- * [group]		Run the start/stop methods as this group.
- *
- * [privileges]		An array of RBAC privilege names.  The start/stop
- *			methods will be run with this privilege set.
- *			See also: privileges(5).
- *
- * [environment]	A hash of environment variables for the start/stop
- *			methods.
+ * Note that for backwards compatibility we also accept a string in place of
+ * the method object for 'start' and 'stop', which is assumed to be the 'exec'
+ * value for that method.
  */
 function emitManifest(stream, conf)
 {
