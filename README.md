@@ -5,6 +5,8 @@ It's only intended to generate simple manifests. For more details, see _smf(5)_.
 
 This tool is still experimental. 
 
+    [sudo] npm install -g smfgen
+
 
 # JSON Input
 
