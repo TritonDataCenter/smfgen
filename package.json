@@ -1,0 +1,25 @@
+{
+  "name": "smfgen",
+  "description": "Generate an SMF manifest from a JSON description of the service",
+  "author": "davepacheco (https://github.com/davepacheco/)",
+  "version": "0.0.0",
+  "repository": {
+    "url": "https://github.com/davepacheco/smfgen",
+    "type": "git"
+  },
+  "preferGlobal": true,
+  "bin": {
+    "smfgen": "./smfgen"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  },
+  "keywords": [
+    "illumos",
+    "smartos",
+    "smf"
+  ]
+}
