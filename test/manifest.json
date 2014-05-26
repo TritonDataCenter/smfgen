@@ -1,0 +1,5 @@
+{
+  "ident": "bapi",
+  "label": "Boilerplate API",
+  "start": "node bapi.js"
+}

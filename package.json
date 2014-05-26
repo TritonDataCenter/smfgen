@@ -7,7 +7,7 @@
 		"url": "https://github.com/davepacheco/smfgen",
 		"type": "git"
 	},
-	"preferGlobal": true,
+	"main": "./smfgen",
 	"bin": {
 		"smfgen": "./smfgen"
 	},
