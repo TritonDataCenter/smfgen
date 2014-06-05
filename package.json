@@ -1,6 +1,6 @@
 {
 	"name": "smfgen",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "Generate an SMF manifest from a JSON description of the service",
 	"author": "Dave Pacheco <dap@joyent.com>",
 	"repository": {
@@ -11,16 +11,6 @@
 	"bin": {
 		"smfgen": "./smfgen"
 	},
-	"dependencies": {},
-	"devDependencies": {},
-	"optionalDependencies": {},
-	"engines": {
-		"node": "*"
-	},
 	"license": "MIT",
-	"keywords": [
-		"illumos",
-		"smartos",
-		"smf"
-	]
+	"keywords": [ "illumos", "smartos", "smf" ]
 }

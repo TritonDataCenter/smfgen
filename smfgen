@@ -350,6 +350,6 @@ function main()
 }
 
 if (require.main === module)
-  main();
+	main();
 else
-  module.exports = emitManifest;
+	module.exports = emitManifest;
