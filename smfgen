@@ -330,26 +330,78 @@ XmlEmitter.prototype.emitComment = function (content)
 	this.xe_stream.write('<!-- ' + content + ' -->\n');
 };
 
-function main()
-{
-	var stdin, data, json;
-
-	data = '';
-	stdin = process.openStdin();
-	stdin.setEncoding('utf8');
-	stdin.on('data', function (chunk) { data += chunk; });
-	stdin.on('end', function () {
-		try {
-			json = JSON.parse(data);
-			emitManifest(process.stdout, json);
-		} catch (ex) {
-			console.error('smfgen: ' + ex.message);
-			process.exit(1);
-		}
-	});
+if (require.main !== module) {
+	module.exports = emitManifest;
+  return;
 }
 
-if (require.main === module)
-	main();
-else
-	module.exports = emitManifest;
+// running as a command line tool
+
+if (process.argv.length <= 2) {
+  // no arguments, read stdin
+  var stdin, data, json;
+  data = '';
+  stdin = process.openStdin();
+  stdin.setEncoding('utf8');
+  stdin.on('data', function (chunk) { data += chunk; });
+  stdin.on('end', function () {
+    try {
+      json = JSON.parse(data);
+      emitManifest(process.stdout, json);
+    } catch (ex) {
+      console.error('smfgen: ' + ex.message);
+      process.exit(1);
+    }
+  });
+  return;
+}
+
+function usage() {
+  // TODO
+}
+
+// read arguments, ignore stdin
+var getopt = require('posix-getopt');
+
+var options = [
+  'd:(cwd)',
+  'u:(user)',
+  'g:(group)',
+  'i:(ident)',
+  'l:(label)',
+  'e:(env)',
+  'p:(privilege)',
+  's:(start)',
+  'S:(stop)'
+].join('');
+var parser = new getopt.BasicParser(options, process.argv);
+
+var data = {
+  start: {
+    privileges: [],
+    environment: {}
+  },
+  stop: {}
+};
+var option;
+while ((option = parser.getopt()) !== undefined) {
+  switch (option.option) {
+    case 'd': data.start.working_directory = option.optarg; break;
+    case 'u': data.start.user = option.optarg; break;
+    case 'g': data.start.group = option.optarg; break;
+    case 'i': data.ident = option.optarg; break;
+    case 'l': data.label = option.optarg; break;
+    case 'e':
+      var arg = option.optarg;
+      var eq = arg.indexOf('=');
+      if (eq < 0)
+        break;
+      data.start.environment[arg.substr(0, eq)] = arg.substr(eq + 1);
+      break;
+    case 'p': data.start.privileges.push(option.optarg); break;
+    case 's': data.start.exec = option.optarg; break;
+    case 'S': data.stop.exec = option.optarg; break;
+    default: console.error(usage()); process.exit(1); break;
+  }
+}
+emitManifest(process.stdout, data);

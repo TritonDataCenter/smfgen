@@ -12,5 +12,12 @@
 		"smfgen": "./smfgen"
 	},
 	"license": "MIT",
-	"keywords": [ "illumos", "smartos", "smf" ]
+	"keywords": [
+		"illumos",
+		"smartos",
+		"smf"
+	],
+	"dependencies": {
+		"posix-getopt": "^1.1.0"
+	}
 }
