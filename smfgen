@@ -137,6 +137,7 @@ function emitManifest(stream, conf)
 	/* default values for start/stop methods */
 	var start = { name: 'start', timeout: 10 };
 	var stop = { name: 'stop', timeout: 30, exec: ':kill' };
+	var refresh = { name: 'refresh', timeout: 10, exec: ':true' };
 
 	mod_assert.ok(conf.hasOwnProperty('ident') &&
 	    typeof (conf['ident']) == 'string',
@@ -152,6 +153,7 @@ function emitManifest(stream, conf)
 	 */
 	checkAndApplyContext(null, conf, start);
 	checkAndApplyContext(null, conf, stop);
+	checkAndApplyContext(null, conf, refresh);
 
 	if (conf.hasOwnProperty('start')) {
 		if (typeof (conf.start) === 'string') {
@@ -170,6 +172,13 @@ function emitManifest(stream, conf)
 			stop.exec = conf.stop;
 		else
 			checkAndApplyContext('stop', conf.stop, stop);
+	}
+
+	if (conf.hasOwnProperty('refresh')) {
+		if (typeof (conf.refresh) === 'string')
+			refresh.exec = conf.refresh;
+		else
+			checkAndApplyContext('refresh', conf.refresh, refresh);
 	}
 
 	if (conf.hasOwnProperty('dependencies')) {
@@ -222,6 +231,8 @@ function emitManifest(stream, conf)
 
 	emitMethod(xml, start);
 	emitMethod(xml, stop);
+	if (conf.hasOwnProperty('refresh'))
+		emitMethod(xml, refresh);
 
 	xml.emitStart('template');
 	xml.emitStart('common_name');
