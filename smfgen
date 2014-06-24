@@ -125,8 +125,8 @@ function emitMethod(xml, conf)
  * expected structure of the JSON stream is specified in README.md.
  *
  * Note that for backwards compatibility we also accept a string in place of
- * the method object for 'start' and 'stop', which is assumed to be the 'exec'
- * value for that method.
+ * the method object for 'start', 'stop', and 'refresh', which is assumed to be
+ * the 'exec' value for that method.
  */
 function emitManifest(stream, conf)
 {

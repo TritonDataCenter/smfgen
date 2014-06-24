@@ -20,6 +20,7 @@ Emits an SMF manifest for the service described by the given JSON:
 | [dependencies] | Array of service FMRIs that must be online before this service is started.
 | start          | The method object that describes how to start the service.  (See below.)
 | [stop]         | The method object that describes how to stop the service.  (See below.)
+| [refresh]      | The method object that describes how to refresh the service.  (See below.)
 
 Both the `start` and `stop` properties in the JSON should have object values that
 describe the context of the method.  A method context consists of these
@@ -33,7 +34,7 @@ properties:
 | [environment]        | A hash of environment variables for this method script.
 | [privileges]         | An array of RBAC privilege names.  This method will be run with this privilege set.  See also: _privileges(5)_.
 | [working\_directory] | Use this working directory when invoking the method script.
-| [timeout]            | The number of seconds the method may run before it is considered timed out and aborted.  Defaults to 10 for `start` and 30 for `stop`.
+| [timeout]            | The number of seconds the method may run before it is considered timed out and aborted.  Defaults to 10 for `start` and `refresh` and 30 for `stop`.
 
 A set of example methods might look like this:
 
@@ -65,8 +66,8 @@ methods, but may also be overridden in a specific method.  For example:
 ```
 
 For compatibility with earlier versions of smfgen, the program will accept
-a string in place of an object for the `start` and `stop` methods.  This
-string will be assumed to be the `exec` property of that method.
+a string in place of an object for the `start`, `stop`, and `refresh` methods.
+This string will be assumed to be the `exec` property of that method.
 
 
 # Example
