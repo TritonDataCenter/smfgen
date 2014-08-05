@@ -61,6 +61,12 @@ function checkAndApplyContext(prefix, conf, applyto)
 		    '"' + s + 'timeout" property must be a number');
 		applyto.timeout = conf.timeout;
 	}
+
+	if (conf.hasOwnProperty('enabled')) {
+		mod_assert.equal(typeof (conf.enabled), 'boolean',
+		    '"' + s + 'enabled" property must be a boolean');
+		applyto.enabled = conf.enabled;
+	}
 }
 
 function shouldEmitMethodContext(conf)
@@ -214,7 +220,8 @@ function emitManifest(stream, conf)
 		'version': '1'
 	});
 
-	xml.emitEmpty('create_default_instance', { 'enabled': 'true' });
+	var enabled = conf.hasOwnProperty('enabled') ? conf.enabled : true;
+	xml.emitEmpty('create_default_instance', { 'enabled': enabled });
 
 	i = 0;
 	deps.forEach(function (dep) {

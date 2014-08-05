@@ -21,6 +21,7 @@ Emits an SMF manifest for the service described by the given JSON:
 | start          | The method object that describes how to start the service.  (See below.)
 | [stop]         | The method object that describes how to stop the service.  (See below.)
 | [refresh]      | The method object that describes how to refresh the service.  (See below.)
+| [enabled]      | Whether to start the service automatically (default: true)
 
 Both the `start` and `stop` properties in the JSON should have object values that
 describe the context of the method.  A method context consists of these
@@ -112,7 +113,7 @@ This tool makes a ton of assumptions about your service:
   See _svc.startd(1M)_ for details.
 * Your service is an application which depends on system services like the filesystem and network. This tool wouldn't work for system services implementing any of that functionality.
 * If you specify any additional dependencies (like other services of yours), that means your service should not be started until those other services are online. However, if those services restart, your service will not be restarted.
-* You only intend to have one instance of your service, and it starts off enabled.
+* You only intend to have one instance of your service.
 * SMF provides a mechanism for timing out the "start" operation. But for simplicity, this tool always runs your start script in the background, so as far as SMF sees it starts almost instantly. If you want to detect "start" timeout, you must implement a start method that returns exactly when your program has started providing service (e.g., opened its server socket), and you'll have to write your own manifest rather than use this tool.
 * By default, the "stop" method just kills all processes in this service, which includes all processes forked by the initial "start" script. You can override this with a "stop" script, but you should use the default if that script is only going to kill processes. There's a default 30 second timeout on the stop script, so the processes must exit within about 30 seconds of receiving the signal.
 * The service does not use SMF to store configuration properties.
