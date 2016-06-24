@@ -1,10 +1,10 @@
 {
 	"name": "smfgen",
-	"version": "0.1.2",
+	"version": "1.0.0",
 	"description": "Generate an SMF manifest from a JSON description of the service",
 	"author": "Dave Pacheco <dap@joyent.com>",
 	"repository": {
-		"url": "https://github.com/davepacheco/smfgen",
+		"url": "https://github.com/joyent/smfgen",
 		"type": "git"
 	},
 	"main": "./smfgen",
