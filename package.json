@@ -12,5 +12,5 @@
 		"smfgen": "./smfgen"
 	},
 	"license": "MIT",
-	"keywords": [ "illumos", "smartos", "smf" ]
+	"keywords": [ "illumos", "smartos", "smf", "smfgen" ]
 }
