@@ -4,8 +4,8 @@ var path = require('path');
 var smfgen = require('../');
 
 // test data from the filesystem, pregenerated
-var json = require(path.join(__dirname, 'manifest.json'));
-var xml = fs.readFileSync(path.join(__dirname, 'manifest.xml'), 'utf-8');
+var json = require(path.join(__dirname, 'assets/basic-manifest.json'));
+var xml = fs.readFileSync(path.join(__dirname, 'assets/basic-manifest.xml'), 'utf-8');
 
 // stream smfgen data into a buffer
 var generatedManifest = '';
