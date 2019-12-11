@@ -112,15 +112,18 @@ This string will be assumed to be the `exec` property of that method.
 
 The following options can be specified over the CLI:
 
--  `-d`, `--cwd` becomes `data.start.working_directory`
--  `-e`, `--env` appends to `data.start.environment`
--  `-g`, `--group` becomes `data.start.group`
+-  `-c`, `--category` becomes `data.category`
+-  `-D`, `--dependency` appends to `data.dependencies`
+-  `-d`, `--cwd` becomes `data.working_directory`
+-  `-e`, `--env` appends to `data.environment`
+-  `-g`, `--group` becomes `data.group`
 -  `-i`, `--ident` becomes `data.ident`
 -  `-l`, `--label` becomes `data.label`
--  `-p`, `--privilege` appends to `data.start.privileges`
+-  `-p`, `--privilege` appends to `data.privileges`
 -  `-S`, `--stop` becomes `data.stop.exec`
 -  `-s`, `--start` becomes `data.start.exec`
--  `-u`, `--user` becomes `data.start.user`
+-  `-r`, `--refresh` becomes `data.refresh.exec`
+-  `-u`, `--user` becomes `data.user`
 
 ## Example
 
@@ -151,7 +154,24 @@ The following options can be specified over the CLI:
                 </method_environment>
             </method_context>
         </exec_method>
-        <exec_method type="method" name="stop" exec=":kill" timeout_seconds="30" />
+        <exec_method type="method" name="stop" exec=":kill" timeout_seconds="30" >
+            <method_context working_directory="/var/www" >
+                <method_credential user="nobody" group="other" privileges="basic,net_privaddr" />
+                <method_environment >
+                    <envvar name="HOME" value="/var/tmp" />
+                    <envvar name="PATH" value="/bin:/usr/bin" />
+                </method_environment>
+            </method_context>
+        </exec_method>
+        <exec_method type="method" name="refresh" exec=":true" timeout_seconds="10" >
+            <method_context working_directory="/var/www" >
+                <method_credential user="nobody" group="other" privileges="basic,net_privaddr" />
+                <method_environment >
+                    <envvar name="HOME" value="/var/tmp" />
+                    <envvar name="PATH" value="/bin:/usr/bin" />
+                </method_environment>
+            </method_context>
+        </exec_method>
         <template >
             <common_name >
                 <loctext xml:lang="C" >NGINX Web Server</loctext>

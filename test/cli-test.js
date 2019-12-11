@@ -10,8 +10,10 @@ var PROG = path.join(__dirname, '../smfgen');
 var args = [
 	'-i', 'nginx',
 	'-l', 'NGINX Web Server',
+	'-c', 'my-category',
 
 	'-s', 'nginx -d',
+	'-r', ':kill -HUP',
 	'-d', '/var/www',
 
 	'-u', 'nobody',
@@ -19,6 +21,9 @@ var args = [
 
 	'-p', 'basic',
 	'-p', 'net_privaddr',
+
+	'-D', 'dep1',
+	'-D', 'dep2',
 
 	'-eHOME=/var/tmp',
 	'-ePATH=/bin:/usr/bin'
