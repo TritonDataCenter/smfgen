@@ -113,16 +113,17 @@ This string will be assumed to be the `exec` property of that method.
 The following options can be specified over the CLI:
 
 -  `-c`, `--category` becomes `data.category`
--  `-D`, `--dependency` appends to `data.dependencies`
 -  `-d`, `--cwd` becomes `data.working_directory`
+-  `-D`, `--dependency` appends to `data.dependencies`
 -  `-e`, `--env` appends to `data.environment`
 -  `-g`, `--group` becomes `data.group`
 -  `-i`, `--ident` becomes `data.ident`
 -  `-l`, `--label` becomes `data.label`
 -  `-p`, `--privilege` appends to `data.privileges`
--  `-S`, `--stop` becomes `data.stop.exec`
--  `-s`, `--start` becomes `data.start.exec`
 -  `-r`, `--refresh` becomes `data.refresh.exec`
+-  `-s`, `--start` becomes `data.start.exec`
+-  `-S`, `--stop` becomes `data.stop.exec`
+-  `-t`, `--timeout` becomes `data.timeout`
 -  `-u`, `--user` becomes `data.user`
 
 ## Example
