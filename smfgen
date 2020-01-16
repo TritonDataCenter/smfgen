@@ -452,6 +452,16 @@ function main()
 		}
 	}
 
+	// Remove empty elements
+	Object.keys(data).forEach(function (prop) {
+		var o = data[prop];
+
+		if ((typeof (o) === 'object' && Object.keys(o).length === 0) ||
+		    (Array.isArray(o) && o.length === 0)) {
+			delete data[prop];
+		}
+	});
+
 	try {
 		emitManifest(process.stdout, data);
 	} catch (ex) {
